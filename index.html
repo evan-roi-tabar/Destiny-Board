@@ -1,0 +1,1041 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Destiny Board | Visualize Your Dreams</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Montserrat:wght@700;800;900&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #6c5ce7;
+            --primary-dark: #5649c9;
+            --secondary: #fd79a8;
+            --secondary-light: #ff8db5;
+            --accent: #00cec9;
+            --dark: #2d3436;
+            --light: #f7f7f7;
+            --card-bg: rgba(255, 255, 255, 0.85);
+            --glass-bg: rgba(255, 255, 255, 0.25);
+            --glass-border: rgba(255, 255, 255, 0.4);
+            --inspire-gradient: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            --dream-gradient: linear-gradient(135deg, #ff758c 0%, #ff7eb3 100%);
+            --bg-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --header-gradient: linear-gradient(to right, #6c5ce7, #fd79a8, #00cec9);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+        
+        body {
+            background: var(--bg-gradient);
+            color: var(--dark);
+            min-height: 100vh;
+            padding: 20px;
+            background-attachment: fixed;
+            background-size: cover;
+            position: relative;
+            overflow-x: hidden;
+        }
+        
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 320"><path fill="%23ffffff" fill-opacity="0.1" d="M0,128L48,117.3C96,107,192,85,288,112C384,139,480,213,576,218.7C672,224,768,160,864,138.7C960,117,1056,139,1152,149.3C1248,160,1344,160,1392,160L1440,160L1440,320L1392,320C1344,320,1248,320,1152,320C1056,320,960,320,864,320C768,320,672,320,576,320C480,320,384,320,288,320C192,320,96,320,48,320L0,320Z"></path></svg>');
+            background-size: cover;
+            background-position: bottom;
+            opacity: 0.2;
+            z-index: -1;
+        }
+        
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2;
+        }
+        
+        .particle {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            animation: float 15s infinite linear;
+        }
+        
+        @keyframes float {
+            0% {
+                transform: translateY(0) rotate(0deg);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100vh) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 40px 0 30px;
+            color: white;
+            position: relative;
+        }
+        
+        h1 {
+            font-family: 'Montserrat', sans-serif;
+            font-size: 3.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 10px rgba(0, 0, 0, 0.3);
+            background: var(--header-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+        
+        .subtitle {
+            font-size: 1.3rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto 25px;
+            font-weight: 300;
+            text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.2);
+        }
+        
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 40px;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .tab-btn {
+            padding: 14px 30px;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-radius: 50px;
+            color: white;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+            position: relative;
+            overflow: hidden;
+            z-index: 1;
+        }
+        
+        .tab-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 0%;
+            height: 100%;
+            background: var(--primary);
+            transition: all 0.4s ease;
+            z-index: -1;
+            border-radius: 50px;
+        }
+        
+        .tab-btn:hover::before,
+        .tab-btn.active::before {
+            width: 100%;
+        }
+        
+        .tab-btn.active {
+            background: var(--primary);
+            box-shadow: 0 4px 20px rgba(108, 92, 231, 0.4);
+        }
+        
+        .tab-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        }
+        
+        .board-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: 30px;
+            margin-top: 20px;
+        }
+        
+        .board {
+            background: var(--card-bg);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: all 0.4s ease;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .board::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 5px;
+        }
+        
+        .inspire-board::before {
+            background: var(--inspire-gradient);
+        }
+        
+        .dream-board::before {
+            background: var(--dream-gradient);
+        }
+        
+        .board:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+        }
+        
+        .board-title {
+            color: var(--primary-dark);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            font-weight: 700;
+            font-size: 1.5rem;
+        }
+        
+        .board-title i {
+            margin-right: 12px;
+            font-size: 1.8rem;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            color: white;
+        }
+        
+        .inspire-board .board-title i {
+            background: var(--inspire-gradient);
+        }
+        
+        .dream-board .board-title i {
+            background: var(--dream-gradient);
+        }
+        
+        .website-card {
+            background: white;
+            border-radius: 15px;
+            padding: 18px;
+            margin-bottom: 20px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .website-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 5px;
+            height: 100%;
+        }
+        
+        .website-card:hover {
+            transform: translateX(8px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        .website-icon {
+            width: 55px;
+            height: 55px;
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 18px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .website-card:hover .website-icon {
+            transform: scale(1.1) rotate(5deg);
+        }
+        
+        .website-info {
+            flex: 1;
+        }
+        
+        .website-name {
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 1.1rem;
+            color: var(--dark);
+        }
+        
+        .website-desc {
+            font-size: 0.95rem;
+            color: #636e72;
+            line-height: 1.4;
+        }
+        
+        .dream-card {
+            border-left: 5px solid var(--secondary);
+        }
+        
+        .dream-card .website-icon {
+            background: var(--dream-gradient);
+        }
+        
+        .inspire-card .website-icon {
+            background: var(--inspire-gradient);
+        }
+        
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            backdrop-filter: blur(5px);
+        }
+        
+        .modal-content {
+            background: var(--card-bg);
+            border-radius: 20px;
+            max-width: 700px;
+            width: 100%;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3);
+            animation: modalFade 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            border: 1px solid var(--glass-border);
+            backdrop-filter: blur(20px);
+        }
+        
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: translateY(-50px) scale(0.9);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            background: var(--glass-bg);
+            border-radius: 20px 20px 0 0;
+        }
+        
+        .modal-logo {
+            width: 70px;
+            height: 70px;
+            border-radius: 15px;
+            margin-right: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+        
+        .modal-title-content {
+            flex: 1;
+        }
+        
+        .modal-title {
+            font-size: 1.8rem;
+            color: var(--primary);
+            font-family: 'Montserrat', sans-serif;
+            margin-bottom: 5px;
+        }
+        
+        .modal-subtitle {
+            color: #636e72;
+            font-size: 1rem;
+        }
+        
+        .modal-body {
+            padding: 30px;
+        }
+        
+        .modal-section {
+            margin-bottom: 25px;
+        }
+        
+        .modal-section h3 {
+            color: var(--primary);
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            font-family: 'Montserrat', sans-serif;
+            font-size: 1.3rem;
+        }
+        
+        .modal-section h3 i {
+            margin-right: 12px;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            background: var(--inspire-gradient);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        .modal-section p {
+            line-height: 1.7;
+            color: #555;
+            margin-left: 47px;
+        }
+        
+        .modal-features {
+            list-style-type: none;
+            margin-left: 47px;
+        }
+        
+        .modal-features li {
+            padding: 10px 0;
+            border-bottom: 1px solid #f1f1f1;
+            display: flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+        
+        .modal-features li:hover {
+            transform: translateX(5px);
+        }
+        
+        .modal-features li i {
+            color: var(--accent);
+            margin-right: 12px;
+            font-size: 1.1rem;
+        }
+        
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.3rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+        }
+        
+        .modal-close:hover {
+            background: var(--secondary);
+            transform: rotate(90deg);
+        }
+        
+        .quote {
+            text-align: center;
+            margin: 50px 0;
+            color: white;
+            font-style: italic;
+            font-size: 1.2rem;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            padding: 25px;
+            border-radius: 15px;
+            background: var(--glass-bg);
+            backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+        
+        footer {
+            text-align: center;
+            padding: 20px;
+            color: white;
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .board-container {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 2.5rem;
+            }
+            
+            .tabs {
+                flex-direction: column;
+                align-items: center;
+            }
+            
+            .tab-btn {
+                width: 80%;
+            }
+            
+            .modal-header {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .modal-logo {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .modal-section h3 {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .modal-section p,
+            .modal-features {
+                margin-left: 0;
+            }
+        }
+        
+        /* Animation for cards on load */
+        @keyframes cardAppear {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .animate-card {
+            animation: cardAppear 0.6s forwards;
+        }
+        
+        /* Floating animation for background elements */
+        .floating {
+            animation: floating 8s ease-in-out infinite;
+        }
+        
+        @keyframes floating {
+            0% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+            100% {
+                transform: translateY(0px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="particles" id="particles"></div>
+    
+    <div class="container">
+        <header>
+            <h1 class="floating">Evan's Destiny Board</h1>
+            <p class="subtitle">A visual representation of my inspirations and dreams to guide my growth and keep me energized</p>
+            
+            <div class="tabs">
+                <button class="tab-btn active" data-tab="all">All Items</button>
+                <button class="tab-btn" data-tab="inspire">Inspirations</button>
+                <button class="tab-btn" data-tab="dream">Dream Projects</button>
+            </div>
+        </header>
+        
+        <div class="board-container">
+            <div class="board inspire-board">
+                <h2 class="board-title">
+                    <i class="fas fa-star"></i> Inspirational Websites
+                </h2>
+                
+                <div class="website-card inspire-card animate-card" style="animation-delay: 0.1s" data-id="1" data-type="inspire">
+                    <div class="website-icon">
+                        <i class="fab fa-apple"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Apple</div>
+                        <div class="website-desc">Design excellence and innovation</div>
+                    </div>
+                </div>
+                
+                <div class="website-card inspire-card animate-card" style="animation-delay: 0.2s" data-id="2" data-type="inspire">
+                    <div class="website-icon">
+                        <i class="fab fa-google"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Google Design</div>
+                        <div class="website-desc">Material design and UX research</div>
+                    </div>
+                </div>
+                
+                <div class="website-card inspire-card animate-card" style="animation-delay: 0.3s" data-id="3" data-type="inspire">
+                    <div class="website-icon">
+                        <i class="fas fa-paint-brush"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Adobe Create</div>
+                        <div class="website-desc">Creative inspiration across mediums</div>
+                    </div>
+                </div>
+                
+                <div class="website-card inspire-card animate-card" style="animation-delay: 0.4s" data-id="4" data-type="inspire">
+                    <div class="website-icon">
+                        <i class="fas fa-film"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Studio Ghibli</div>
+                        <div class="website-desc">Beautiful storytelling and artistry</div>
+                    </div>
+                </div>
+                
+                <div class="website-card inspire-card animate-card" style="animation-delay: 0.5s" data-id="5" data-type="inspire">
+                    <div class="website-icon">
+                        <i class="fas fa-award"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Awwwards</div>
+                        <div class="website-desc">Showcasing the best of web design</div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="board dream-board">
+                <h2 class="board-title">
+                    <i class="fas fa-dream"></i> Dream Projects
+                </h2>
+                
+                <div class="website-card dream-card animate-card" style="animation-delay: 0.6s" data-id="1" data-type="dream">
+                    <div class="website-icon">
+                        <i class="fas fa-book-open"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Interactive Story Platform</div>
+                        <div class="website-desc">Choose-your-own-adventure stories</div>
+                    </div>
+                </div>
+                
+                <div class="website-card dream-card animate-card" style="animation-delay: 0.7s" data-id="2" data-type="dream">
+                    <div class="website-icon">
+                        <i class="fas fa-gamepad"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Educational Game Studio</div>
+                        <div class="website-desc">Making learning fun through gameplay</div>
+                    </div>
+                </div>
+                
+                <div class="website-card dream-card animate-card" style="animation-delay: 0.8s" data-id="3" data-type="dream">
+                    <div class="website-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Creative Community Hub</div>
+                        <div class="website-desc">A space for artists to collaborate</div>
+                    </div>
+                </div>
+                
+                <div class="website-card dream-card animate-card" style="animation-delay: 0.9s" data-id="4" data-type="dream">
+                    <div class="website-icon">
+                        <i class="fas fa-video"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Animated Short Series</div>
+                        <div class="website-desc">Telling meaningful stories through animation</div>
+                    </div>
+                </div>
+                
+                <div class="website-card dream-card animate-card" style="animation-delay: 1s" data-id="5" data-type="dream">
+                    <div class="website-icon">
+                        <i class="fas fa-palette"></i>
+                    </div>
+                    <div class="website-info">
+                        <div class="website-name">Digital Art Gallery</div>
+                        <div class="website-desc">Showcasing emerging digital artists</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="quote">
+            "Your energy flows where your attention goes. This Destiny Board helps focus that energy on what truly inspires you."
+        </div>
+    </div>
+
+    <footer>
+        &copy; 2025 Evan's Destiny Board | Visualize Your Dreams
+    </footer>
+
+    <!-- Modal for detailed content -->
+    <div class="modal" id="detailModal">
+        <div class="modal-content">
+            <div class="modal-close" id="modalClose">
+                <i class="fas fa-times"></i>
+            </div>
+            <div class="modal-header">
+                <div class="modal-logo" id="modalLogo">
+                    <i class="fab fa-apple"></i>
+                </div>
+                <div class="modal-title-content">
+                    <h2 class="modal-title" id="modalTitle">Website/Business Name</h2>
+                    <p class="modal-subtitle" id="modalSubtitle">Category description</p>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="modal-section">
+                    <h3><i class="fas fa-info-circle"></i> About</h3>
+                    <p id="modalAbout">Description will appear here...</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3><i class="fas fa-lightbulb"></i> Why It Inspires Me</h3>
+                    <p id="modalInspiration">Inspiration details will appear here...</p>
+                </div>
+                
+                <div class="modal-section">
+                    <h3><i class="fas fa-trophy"></i> Key Features I Admire</h3>
+                    <ul class="modal-features" id="modalFeatures">
+                        <!-- Features will be added by JavaScript -->
+                    </ul>
+                </div>
+                
+                <div class="modal-section" id="dreamSection">
+                    <h3><i class="fas fa-rocket"></i> My Vision for This Project</h3>
+                    <p id="modalVision">Vision details will appear here...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Create floating particles
+        function createParticles() {
+            const particlesContainer = document.getElementById('particles');
+            const colors = ['rgba(255,255,255,0.3)', 'rgba(253,121,168,0.3)', 'rgba(108,92,231,0.3)', 'rgba(0,206,201,0.3)'];
+            
+            for (let i = 0; i < 30; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('particle');
+                
+                const size = Math.random() * 20 + 5;
+                particle.style.width = `${size}px`;
+                particle.style.height = `${size}px`;
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.top = `${Math.random() * 100}vh`;
+                particle.style.left = `${Math.random() * 100}vw`;
+                
+                const animationDuration = Math.random() * 15 + 10;
+                particle.style.animationDuration = `${animationDuration}s`;
+                particle.style.animationDelay = `-${Math.random() * 15}s`;
+                
+                particlesContainer.appendChild(particle);
+            }
+        }
+
+        // Data for all items
+        const itemsData = {
+            inspire: {
+                1: {
+                    name: "Apple",
+                    subtitle: "Design excellence and innovation",
+                    logo: "fab fa-apple",
+                    about: "Apple Inc. is a technology company known for its innovative products and distinctive design philosophy that emphasizes simplicity, elegance, and user experience.",
+                    inspiration: "Apple's commitment to simplicity, elegance, and user experience has set the standard for technology design worldwide. Their attention to detail and seamless ecosystem integration inspires me to create holistic experiences.",
+                    features: [
+                        "Minimalist and intuitive design language",
+                        "Seamless ecosystem integration across devices",
+                        "Attention to detail in both hardware and software",
+                        "Strong brand identity and consistency",
+                        "Focus on accessibility and inclusivity for all users"
+                    ]
+                },
+                2: {
+                    name: "Google Design",
+                    subtitle: "Material design and UX research",
+                    logo: "fab fa-google",
+                    about: "Google's design team shares resources, case studies, and insights about their design process and philosophy through their design platform.",
+                    inspiration: "Google's Material Design system revolutionized how we think about digital interfaces and motion design. Their open approach to sharing knowledge inspires me to contribute to the design community.",
+                    features: [
+                        "Comprehensive design system (Material Design)",
+                        "Focus on usability research and testing",
+                        "Open sharing of design resources and guidelines",
+                        "Innovative approach to motion and interaction design",
+                        "Cross-platform design consistency"
+                    ]
+                },
+                3: {
+                    name: "Adobe Create",
+                    subtitle: "Creative inspiration across mediums",
+                    logo: "fas fa-paint-brush",
+                    about: "Adobe Create Magazine showcases creative work and provides inspiration for designers and artists across various disciplines and mediums.",
+                    inspiration: "Adobe Create celebrates creativity in all its forms and demonstrates the power of creative tools. It inspires me to explore different mediums and techniques in my own work.",
+                    features: [
+                        "Showcases diverse creative work from around the world",
+                        "Provides tutorials and learning resources for creatives",
+                        "Highlights emerging artists and design trends",
+                        "Beautiful visual storytelling and presentation",
+                        "Connects traditional and digital art forms"
+                    ]
+                },
+                4: {
+                    name: "Studio Ghibli",
+                    subtitle: "Beautiful storytelling and artistry",
+                    logo: "fas fa-film",
+                    about: "Japanese animation studio known for its aesthetically stunning and emotionally powerful films that explore themes of nature, humanity, and spirituality.",
+                    inspiration: "Studio Ghibli's dedication to hand-crafted artistry and meaningful storytelling is unparalleled. Their work inspires me to create with purpose and attention to aesthetic beauty.",
+                    features: [
+                        "Exquisite hand-drawn animation quality",
+                        "Rich, imaginative worlds and settings",
+                        "Strong environmental and spiritual themes",
+                        "Complex, relatable character development",
+                        "Emotional depth and storytelling mastery"
+                    ]
+                },
+                5: {
+                    name: "Awwwards",
+                    subtitle: "Showcasing the best of web design",
+                    logo: "fas fa-award",
+                    about: "Awwwards recognizes and promotes the talent of web designers, developers and agencies worldwide through their competition and awards platform.",
+                    inspiration: "Awwwards showcases the cutting edge of web design and inspires me to push creative boundaries. It motivates me to continuously improve my skills and innovate.",
+                    features: [
+                        "Recognition of design excellence and innovation",
+                        "Showcase of emerging techniques and technologies",
+                        "Community of design professionals and enthusiasts",
+                        "Trend identification and analysis",
+                        "Learning through detailed case studies"
+                    ]
+                }
+            },
+            dream: {
+                1: {
+                    name: "Interactive Story Platform",
+                    subtitle: "Choose-your-own-adventure stories",
+                    logo: "fas fa-book-open",
+                    about: "A platform where users can create and experience interactive, choose-your-own-adventure stories with rich multimedia elements.",
+                    inspiration: "I want to merge great storytelling with technology to create immersive narrative experiences that empower readers to shape their own journeys.",
+                    features: [
+                        "Branching narrative structure with multiple endings",
+                        "Multimedia integration (images, audio, video)",
+                        "Collaborative story creation tools",
+                        "Reader analytics and feedback system",
+                        "Cross-platform accessibility"
+                    ],
+                    vision: "I envision a platform where anyone can create professional-quality interactive stories without coding knowledge, fostering a new generation of digital storytellers and revolutionizing how we experience narratives online."
+                },
+                2: {
+                    name: "Educational Game Studio",
+                    subtitle: "Making learning fun through gameplay",
+                    logo: "fas fa-gamepad",
+                    about: "A studio dedicated to creating games that make learning engaging and effective through playful experiences and well-designed mechanics.",
+                    inspiration: "I believe play is one of the most powerful learning tools, and want to harness that power to make education more engaging and accessible for everyone.",
+                    features: [
+                        "Curriculum-aligned educational content",
+                        "Adaptive difficulty levels based on progress",
+                        "Progress tracking and reporting for educators",
+                        "Multiplayer collaborative challenges",
+                        "Teacher and parent dashboards"
+                    ],
+                    vision: "My vision is to create games that students want to play and teachers want to use, bridging the gap between entertainment and education while making learning truly enjoyable and effective for all ages."
+                },
+                3: {
+                    name: "Creative Community Hub",
+                    subtitle: "A space for artists to collaborate",
+                    logo: "fas fa-users",
+                    about: "An online space where artists, designers, and creators can collaborate, share resources, find opportunities, and grow together.",
+                    inspiration: "I want to break down the isolation that often comes with creative work and foster collaboration between artists of different disciplines and backgrounds.",
+                    features: [
+                        "Portfolio showcasing and feedback system",
+                        "Collaboration tools and project management",
+                        "Resource sharing and asset libraries",
+                        "Job board and freelance opportunities",
+                        "Learning workshops and mentorship programs"
+                    ],
+                    vision: "I dream of creating a vibrant ecosystem where creatives support each other's growth, find meaningful opportunities to apply their talents, and collaborate on projects that none could complete alone, fostering a new renaissance of creative work."
+                },
+                4: {
+                    name: "Animated Short Series",
+                    subtitle: "Telling meaningful stories through animation",
+                    logo: "fas fa-video",
+                    about: "A series of animated short films exploring meaningful themes through diverse visual styles and storytelling techniques.",
+                    inspiration: "Animation has unique power to convey complex ideas and emotions in accessible ways. I want to use this medium to tell stories that matter.",
+                    features: [
+                        "Diverse artistic styles and techniques",
+                        "Meaningful thematic exploration",
+                        "Emotional storytelling approach",
+                        "Cultural diversity in stories and characters",
+                        "Collaboration with emerging animators"
+                    ],
+                    vision: "I want to create animated works that entertain while also addressing important themes like environmentalism, mental health, and human connection, showcasing the artistic potential of animation as a medium for meaningful storytelling that can inspire change."
+                },
+                5: {
+                    name: "Digital Art Gallery",
+                    subtitle: "Showcasing emerging digital artists",
+                    logo: "fas fa-palette",
+                    about: "A platform showcasing digital artists and providing them with tools to exhibit and sell their work in innovative virtual spaces.",
+                    inspiration: "Digital art often lacks the exhibition opportunities of traditional media, and I want to change that by creating dedicated spaces for digital artists to showcase their work.",
+                    features: [
+                        "Virtual exhibition spaces with custom environments",
+                        "Artist profiles and storytelling features",
+                        "Digital art marketplace with secure transactions",
+                        "Augmented reality previews for physical spaces",
+                        "Curated collections and thematic exhibitions"
+                    ],
+                    vision: "I envision a platform that gives digital artists the recognition they deserve while making digital art collecting accessible to everyone, blurring the lines between physical and digital art worlds and creating new economic opportunities for digital creators."
+                }
+            }
+        };
+
+        // DOM elements
+        const modal = document.getElementById('detailModal');
+        const modalClose = document.getElementById('modalClose');
+        const modalTitle = document.getElementById('modalTitle');
+        const modalSubtitle = document.getElementById('modalSubtitle');
+        const modalLogo = document.getElementById('modalLogo');
+        const modalAbout = document.getElementById('modalAbout');
+        const modalInspiration = document.getElementById('modalInspiration');
+        const modalFeatures = document.getElementById('modalFeatures');
+        const modalVision = document.getElementById('modalVision');
+        const dreamSection = document.getElementById('dreamSection');
+        const tabButtons = document.querySelectorAll('.tab-btn');
+        const websiteCards = document.querySelectorAll('.website-card');
+
+        // Function to open modal with item details
+        function openModal(type, id) {
+            const item = itemsData[type][id];
+            
+            // Update modal content
+            modalTitle.textContent = item.name;
+            modalSubtitle.textContent = item.subtitle;
+            modalLogo.innerHTML = `<i class="${item.logo}"></i>`;
+            modalAbout.textContent = item.about;
+            modalInspiration.textContent = item.inspiration;
+            
+            // Clear and repopulate features
+            modalFeatures.innerHTML = '';
+            item.features.forEach(feature => {
+                const li = document.createElement('li');
+                li.innerHTML = `<i class="fas fa-check"></i> ${feature}`;
+                modalFeatures.appendChild(li);
+            });
+            
+            // Handle dream project specific content
+            if (type === 'dream') {
+                dreamSection.style.display = 'block';
+                modalVision.textContent = item.vision;
+            } else {
+                dreamSection.style.display = 'none';
+            }
+            
+            // Show modal
+            modal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+
+        // Function to filter items by type
+        function filterItems(type) {
+            websiteCards.forEach(card => {
+                if (type === 'all') {
+                    card.parentElement.style.display = 'block';
+                } else {
+                    if (card.dataset.type === type) {
+                        card.parentElement.style.display = 'block';
+                    } else {
+                        card.parentElement.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+        // Event listeners
+        websiteCards.forEach(card => {
+            card.addEventListener('click', () => {
+                openModal(card.dataset.type, card.dataset.id);
+            });
+        });
+
+        modalClose.addEventListener('click', () => {
+            modal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        });
+
+        // Close modal when clicking outside content
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
+                document.body.style.overflow = 'auto';
+            }
+        });
+
+        // Tab functionality
+        tabButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                // Update active tab
+                tabButtons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+                
+                // Filter items
+                filterItems(button.dataset.tab);
+            });
+        });
+
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            createParticles();
+            
+            // Animate cards on load
+            websiteCards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+    </script>
+</body>
+</html>
